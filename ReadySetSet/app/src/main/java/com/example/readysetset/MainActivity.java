@@ -10,6 +10,8 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.example.readysetset.algorithm.Segmenter;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -35,6 +37,8 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
 
     private CameraBridgeViewBase mOpenCvCameraView;
 
+    private Segmenter segmenter;
+
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -43,6 +47,7 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCvCameraView.enableView();
                     mOpenCvCameraView.setOnTouchListener(MainActivity.this);
+                    mOpenCvCameraView.setMaxFrameSize(640,480);
                 }
                 break;
                 default: {
@@ -100,6 +105,7 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
     }
 
     public void onCameraViewStarted(int width, int height) {
+        Log.e("SET", "width: "  + width + ", height: " + height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
 //        mDetector = new ColorBlobDetector();
         mSpectrum = new Mat();
@@ -107,6 +113,7 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
         mBlobColorHsv = new Scalar(255);
         SPECTRUM_SIZE = new Size(200, 64);
         CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
+        segmenter = new Segmenter(width, height, 1/2);
     }
 
     public void onCameraViewStopped() {
@@ -166,6 +173,7 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
+        segmenter.detection_candidates(inputFrame.gray());
 //
 //        if (mIsColorSelected) {
 //        mDetector.process(mRgba);
