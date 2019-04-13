@@ -7,7 +7,7 @@ corners = []
 cropped = False
 true_x = 500
 true_y = 300
-true_corners = np.float32([[0,0],[true_x,0],[true_x,true_y],[0,true_y]])
+true_corners = np.float32([[0,true_y],[0,0],[true_x,0],[true_x,true_y]])
 
 key_order = ['1','2','3']
 key_to_color = {'1':'red', '2':'green', '3':'purple'}
@@ -49,56 +49,70 @@ def click_and_crop(event, x, y, flags, param):
 
 for filename in os.listdir(unsorted_dir):
     img = cv2.imread(os.path.join(unsorted_dir,filename))
-    cv2.namedWindow('image')
-    cv2.setMouseCallback('image',click_and_crop)
-    corners = []
-    cropped = False
-    while(not cropped):
-        cv2.imshow('image',img)
-        cv2.waitKey(20)
-    cv2.destroyWindow('image')
-    M = cv2.getPerspectiveTransform(np.float32(corners),true_corners)
-    warp_img = cv2.warpPerspective(img,M,(true_x, true_y))
+    img = cv2.resize(img, (int(img.shape[1]/img.shape[0]*1000), 1000))
+    failed = True
+    while failed :
+        failed = False
+        corners = []
+        cropped = False
+        cv2.namedWindow('image')
+        cv2.setMouseCallback('image',click_and_crop)
+        while(not cropped):
+            cv2.imshow('image',img)
+            cv2.waitKey(20)
+        cv2.destroyWindow('image')
+        M = cv2.getPerspectiveTransform(np.float32(corners),true_corners)
+        warp_img = cv2.warpPerspective(img,M,(true_x, true_y))
 
-    color_img = np.copy(warp_img)
-    cv2.putText(color_img,choices_string(key_order, key_to_color),\
-                (10,25), cv2.FONT_HERSHEY_SIMPLEX, .8, (0,0,0), 2)
-    cv2.imshow('image',color_img)
-    color = None
-    while not color :
-        key = chr(cv2.waitKey(0))
-        if key in key_to_color :
-            color = key_to_color[key]
+        color_img = np.copy(warp_img)
+        cv2.putText(color_img,choices_string(key_order, key_to_color),\
+                    (10,25), cv2.FONT_HERSHEY_SIMPLEX, .8, (0,0,0), 2)
+        cv2.imshow('image',color_img)
+        color = None
+        while not color and not failed :
+            key = chr(cv2.waitKey(0))
+            if key in key_to_color :
+                color = key_to_color[key]
+            if key == 'x' :
+                failed = True
 
-    shape_img = np.copy(warp_img)
-    cv2.putText(shape_img,choices_string(key_order, key_to_shape),\
-                (10,25), cv2.FONT_HERSHEY_SIMPLEX, .8, (0,0,0), 2)
-    cv2.imshow('image',shape_img)
-    shape = None
-    while not shape :
-        key = chr(cv2.waitKey(0))
-        if key in key_to_shape :
-            shape = key_to_shape[key]
+        shape_img = np.copy(warp_img)
+        cv2.putText(shape_img,choices_string(key_order, key_to_shape),\
+                    (10,25), cv2.FONT_HERSHEY_SIMPLEX, .8, (0,0,0), 2)
+        cv2.imshow('image',shape_img)
+        shape = None
+        while not shape and not failed :
+            key = chr(cv2.waitKey(0))
+            if key in key_to_shape :
+                shape = key_to_shape[key]
+            if key == 'x' :
+                failed = True
 
-    pattern_img = np.copy(warp_img)
-    cv2.putText(pattern_img,choices_string(key_order, key_to_pattern),\
-                (10,25), cv2.FONT_HERSHEY_SIMPLEX, .8, (0,0,0), 2)
-    cv2.imshow('image',pattern_img)
-    pattern = None
-    while not pattern :
-        key = chr(cv2.waitKey(0))
-        if key in key_to_pattern :
-            pattern = key_to_pattern[key]
+        pattern_img = np.copy(warp_img)
+        cv2.putText(pattern_img,choices_string(key_order, key_to_pattern),\
+                    (10,25), cv2.FONT_HERSHEY_SIMPLEX, .8, (0,0,0), 2)
+        cv2.imshow('image',pattern_img)
+        pattern = None
+        while not pattern and not failed :
+            key = chr(cv2.waitKey(0))
+            if key in key_to_pattern :
+                pattern = key_to_pattern[key]
+            if key == 'x' :
+                failed = True
 
-    number_img = np.copy(warp_img)
-    cv2.putText(number_img,choices_string(key_order, key_to_number),\
-                (10,25), cv2.FONT_HERSHEY_SIMPLEX, .8, (0,0,0), 2)
-    cv2.imshow('image',number_img)
-    number = None
-    while not number :
-        key = chr(cv2.waitKey(0))
-        if key in key_to_number :
-            number = key_to_number[key]
+        number_img = np.copy(warp_img)
+        cv2.putText(number_img,choices_string(key_order, key_to_number),\
+                    (10,25), cv2.FONT_HERSHEY_SIMPLEX, .8, (0,0,0), 2)
+        cv2.imshow('image',number_img)
+        number = None
+        while not number and not failed :
+            key = chr(cv2.waitKey(0))
+            if key in key_to_number :
+                number = key_to_number[key]
+            if key == 'x' :
+                failed = True
+        
+        cv2.destroyWindow('image')
 
     cv2.imwrite(os.path.join(color_dir, color, filename), warp_img);
     cv2.imwrite(os.path.join(shape_dir, shape, filename), warp_img);
