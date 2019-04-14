@@ -39,11 +39,12 @@ public class Segmenter {
     public ArrayList<Mat> mDebugMats;
 
 
+
     private static Mat kernel = Mat.ones(3, 3, CvType.CV_32F);
 
     public Segmenter(int width, int height, double scale) {
-        this.width = (int)(width*scale);
-        this.height = (int)(height*scale);
+        mWidth = width;
+        mHeight = height;
 
         int width_small = (int)(width*scale);
         int height_small = (int)(height*scale);
