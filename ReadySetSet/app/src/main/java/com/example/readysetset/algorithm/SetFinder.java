@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public class SetFinder {
-    static List<Set<Integer>> findSent(List<Integer[]> inputCards) {
+    static List<Set<Integer>> findSet(List<Integer[]> inputCards) {
         List<Set<Integer>> retVal = new ArrayList<>();
 
         for (int i = 0; i < inputCards.size(); i++) {
@@ -17,7 +17,7 @@ public class SetFinder {
                 // Calculate card that would complete the set
                 Integer[] matches = new Integer[c1.length];
                 for (int k = 0; k < matches.length; k++) {
-                    matches[k] = c1[k]==c2[k] ? c1[k] : c1[k]^c2[k];
+                    matches[k] = c1[k]==c2[k] ? c1[k] : (c1[k]^c2[k])%3;
                 }
                 for (int k = 0; k < inputCards.size(); k++) {
                     if (Arrays.equals(inputCards.get(k), matches)) {
