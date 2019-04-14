@@ -6,11 +6,13 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Segmenter {
     // stores the main operations
@@ -80,6 +82,9 @@ public class Segmenter {
             if (outBuffer.toList().size() != 4) continue;
             double area = Imgproc.contourArea(outBuffer);
             if (area < 1000 || area > 20000) continue;
+            double angle = angleScore(outBuffer.toList());
+            Log.e("SET", angle + "");
+            if (angle > Math.PI / 10) continue;
 
             MatOfPoint mat = new MatOfPoint(outBuffer.toArray());
             if(!mat.empty()) mCandidates.add(mat);
@@ -102,5 +107,44 @@ public class Segmenter {
             mat.release();
         }
         mHierarchy.release();
+    }
+
+    Point v1 = new Point(0, 0);
+    Point v2 = new Point(0, 0);
+
+    /**
+     * Calculates the angle at each corner,
+     * for each computes abs(angle - 90)
+     * returns the largest
+     * @param points
+     * @return
+     */
+    private double angleScore(List<Point> points) {
+        double score = 0;
+
+        for (int j = 0; j < points.size(); j++) {
+            int i = (j - 1) % points.size();
+            if (i < 0) i += points.size();
+            int k = (j + 1) % points.size();
+
+            Point p1 = points.get(i);
+            Point p2 = points.get(j);
+            Point p3 = points.get(k);
+
+            //Point v1 = new Point(p1.x - p2.x, p1.y - p2.y);
+            //Point v2 = new Point(p3.x - p2.x, p3.y - p2.y);
+            v1.x = p1.x - p2.x;
+            v1.y = p1.y - p2.y;
+
+            v2.x = p3.x - p2.x;
+            v2.y = p3.y - p2.y;
+
+
+            double angle = Math.acos(v1.dot(v2) / Math.sqrt(v1.dot(v1)) / Math.sqrt(v2.dot(v2)));
+            double new_score = Math.abs(angle - Math.PI/2);
+            score = Math.max(score, new_score);
+        }
+
+        return score;
     }
 }
