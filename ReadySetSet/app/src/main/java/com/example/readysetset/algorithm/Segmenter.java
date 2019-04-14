@@ -42,8 +42,8 @@ public class Segmenter {
     private static Mat kernel = Mat.ones(3, 3, CvType.CV_32F);
 
     public Segmenter(int width, int height, double scale) {
-        this.mWidth = width;
-        this.mHeight = height;
+        this.width = (int)(width*scale);
+        this.height = (int)(height*scale);
 
         int width_small = (int)(width*scale);
         int height_small = (int)(height*scale);
@@ -61,7 +61,6 @@ public class Segmenter {
         mDebugMats = new ArrayList<>();
         mDebugMats.add(mResults);
         mDebugMats.add(mBinaryDisplay);
-
     }
 
     public void detection_candidates(Mat frame) {
