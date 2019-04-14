@@ -36,6 +36,11 @@ def get_warp(points):
         [0,classify_height]], dtype='float32')
     return cv2.getPerspectiveTransform(rect, dest)
 
+def get_image(frame, points):
+    warp = get_warp(points)
+    warped = cv2.warpPerspective(frame, warp, (classify_width, classify_height))
+    return warped
+
 def detection_candidates(frame):
     global binary
 
@@ -52,10 +57,6 @@ def detection_candidates(frame):
     contours = [contour for contour in contours if len(contour) == 4]
     return np.squeeze(contours)
 
-def get_image(frame, points):
-    warp = get_warp(points)
-    warped = cv2.warpPerspective(frame, warp, (classify_width, classify_height))
-    return warped
 
 def intersection(a,b):
   x = max(a[0], b[0])
