@@ -2,10 +2,13 @@ package com.example.readysetset.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class SetFinder {
-    static ArrayList<Integer> findSent(ArrayList<Integer[]> inputCards) {
-        ArrayList<Integer> retVal = new ArrayList<>();
+    static List<Set<Integer>> findSent(List<Integer[]> inputCards) {
+        List<Set<Integer>> retVal = new ArrayList<>();
 
         for (int i = 0; i < inputCards.size(); i++) {
             for (int j = i+1; j < inputCards.size(); j++) {
@@ -18,7 +21,11 @@ public class SetFinder {
                 }
                 for (int k = 0; k < inputCards.size(); k++) {
                     if (Arrays.equals(inputCards.get(k), matches)) {
-                        retVal.add(k);
+                        Set<Integer> set = new HashSet<>();
+                        set.add(i);
+                        set.add(j);
+                        set.add(k);
+                        retVal.add(set);
                     }
                 }
             }

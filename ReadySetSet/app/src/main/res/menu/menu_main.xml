@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.readysetset.MainActivity">
+    <item   android:id="@+id/game_mode"
+        android:title="Game Mode"/>
+
+    <item   android:id="@+id/ref_mode"
+        android:title="Referee Mode"/>
+</menu>
