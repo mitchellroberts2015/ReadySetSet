@@ -17,7 +17,7 @@ public class SetFinder {
                 // Calculate card that would complete the set
                 Integer[] matches = new Integer[c1.length];
                 for (int k = 0; k < matches.length; k++) {
-                    matches[k] = c1[k]==c2[k] ? c1[k] : (c1[k]^c2[k])%2;
+                    matches[k] = c1[k]==c2[k] ? c1[k] : (c1[k]^c2[k])%3;
                 }
                 for (int k = 0; k < inputCards.size(); k++) {
                     if (Arrays.equals(inputCards.get(k), matches)) {
