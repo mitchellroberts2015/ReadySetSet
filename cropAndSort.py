@@ -5,8 +5,8 @@ import numpy as np
 
 corners = []
 cropped = False
-true_x = 500
-true_y = 300
+true_x = 250
+true_y = 150
 true_corners = np.float32([[0,true_y],[0,0],[true_x,0],[true_x,true_y]])
 
 key_order = ['1','2','3']
@@ -111,9 +111,10 @@ for filename in os.listdir(unsorted_dir):
                 number = key_to_number[key]
             if key == 'x' :
                 failed = True
-        
+
         cv2.destroyWindow('image')
 
+    warp_img = cv2.resize(warp_img, (true_x//2, true_y//2))
     cv2.imwrite(os.path.join(color_dir, color, filename), warp_img);
     cv2.imwrite(os.path.join(shape_dir, shape, filename), warp_img);
     cv2.imwrite(os.path.join(pattern_dir, pattern, filename), warp_img);
