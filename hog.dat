@@ -1,13 +1,13 @@
 %YAML:1.0
 ---
-hog: !!opencv-object-detector-hog
-   winSize: [ 64, 128 ]
-   blockSize: [ 32, 32 ]
-   blockStride: [ 16, 16 ]
-   cellSize: [ 16, 16 ]
+new_hog: !!opencv-object-detector-hog
+   winSize: [ 250, 150 ]
+   blockSize: [ 50, 50 ]
+   blockStride: [ 25, 25 ]
+   cellSize: [ 25, 25 ]
    nbins: 9
    derivAperture: 1
-   winSigma: 8.
+   winSigma: 1.2500000000000000e+01
    histogramNormType: 0
    L2HysThreshold: 2.0000000000000001e-01
    gammaCorrection: 0

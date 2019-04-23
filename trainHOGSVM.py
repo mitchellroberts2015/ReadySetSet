@@ -2,11 +2,13 @@ import cv2
 import sys
 import os
 import numpy as np
+# from svm import *
+# from svmutil import *
 
 classes_dir = sys.argv[1]
 hogs = []
 labels = []
-hog = cv2.HOGDescriptor((64,128), (32,32), (16,16), (16,16), 9)
+hog = cv2.HOGDescriptor((250,150), (50,50), (25,25), (25,25), 9)
 
 def predict_file(filename, hog, svm, map) :
     img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -28,6 +30,13 @@ int_to_label = {label_to_int[l]:l for l in label_to_int}
 int_labels = np.array([label_to_int[x] for x in labels])
 hogs = np.array(hogs)
 
+# prob = svm_problem(int_labels,hogs)
+# param = svm_parameter()
+# param.C = 2.67
+# param.gamma = 5.383
+# param.kernel_type = LINEAR
+# m = svm_train(prob, param)
+# svm_save_model(sys.argv[2],m)
 svm = cv2.ml.SVM_create()
 svm.setKernel(cv2.ml.SVM_LINEAR)
 svm.setType(cv2.ml.SVM_C_SVC)
