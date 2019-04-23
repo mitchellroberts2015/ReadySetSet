@@ -2,9 +2,13 @@
 import numpy as np
 import cv2
 import time
+from CardClassifier import CardClassifier
+import SetSolver
 
 classify_width = 250
 classify_height = 150
+
+cc = CardClassifier('cardSVM.dat', 'colors.csv', 'numberSVM.dat', None, 'shapeSVM.dat', 'hog.dat')
 
 def order_points(pts):
     #pts = np.roll(pts, 1, axis=1)
@@ -23,7 +27,7 @@ def order_points(pts):
 
     if dist1 < dist2:
         rect = np.roll(rect, 1, axis=0)
-        
+
 
     return rect
 
@@ -69,10 +73,16 @@ def intersection(a,b):
 binary = None
 if __name__ == '__main__':
     detections = []
-    cap = cv2.VideoCapture('one.mp4')
+    # cap = cv2.VideoCapture('one.mp4')
+    cap = cv2.VideoCapture(1)
     flag = True
     while True:
         ret, frame = cap.read()
+        # frame = cv2.imread('set.jpg')
+        # height, width = frame.shape[:2]
+        # height = int(height*0.25)
+        # width = int(width*0.25)
+        # frame = cv2.resize(frame, (width, height))
 
         # loop video
         #if frame is None:
@@ -80,10 +90,10 @@ if __name__ == '__main__':
         #    continue
 
         # downsample
-        height, width = frame.shape[:2] 
-        scale = 0.5
-        height = int(height*0.5)
-        width = int(width*0.5)
+        height, width = frame.shape[:2]
+        scale = 0.7
+        height = int(height*scale)
+        width = int(width*scale)
         frame = cv2.resize(frame, (width, height))
         frame_cpy = np.copy(frame)
 
@@ -127,19 +137,41 @@ if __name__ == '__main__':
         #    p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
         #    cv2.rectangle(frame, p1, p2, (255,0,0), 2, 1)
 
+        found_cards = []
+        card_contours = []
+        sets = []
+
         if len(contours.shape) == 3:
-            cv2.drawContours(frame_cpy, contours, -1, (0,255,0), 3)
+            # cv2.drawContours(frame_cpy, contours, -1, (255,0,0), 3)
+
+            for contour in contours :
+                card = get_image(frame, contour)
+                classification = cc.predict(card)
+                if classification :
+                    found_cards.append(classification)
+                    card_contours.append(contour)
+
+            cv2.drawContours(frame_cpy, card_contours, -1, (255,0,0), 3)
+
+            # print([cc.class_to_str(c) for c in found_cards])
+
+            sets = SetSolver.set_solver(found_cards)
+
+            if len(sets) > 0 :
+                cv2.drawContours(frame_cpy, [card_contours[i] for i in sets[0]], -1, (0,255,0), 3)
+                # frame_cpy = cv2.fillPoly(frame_cpy, contours[i], (255,0,0))
+
+        cv2.putText(frame_cpy, str(len(sets)) + (" Total Set" if len(sets) == 1 else " Total Sets"),\
+                    (30,50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2)
+
 
         display = np.zeros((height*2, width, 3), dtype='uint8')
         display[:height,:,:] = frame_cpy
         display[height:,:,0] = binary
 
 
-
-
-
         cv2.imshow('frame', display)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if cv2.waitKey(20) & 0xFF == ord('q'):
             break
 
     cap.release()
