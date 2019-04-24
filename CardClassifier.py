@@ -37,7 +37,7 @@ class CardClassifier :
         return int(self.number_svm.predict(img_hog)[1][0][0])
 
     def predict_pattern(self, img) :
-        return 0;
+        return 1;
 
     def predict_shape(self, img, gray_img=None, img_hog=None) :
         if img_hog is None :

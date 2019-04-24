@@ -4,6 +4,7 @@ import cv2
 import time
 from CardClassifier import CardClassifier
 import SetSolver
+import cardDrawer
 
 classify_width = 250
 classify_height = 150
@@ -74,7 +75,7 @@ binary = None
 if __name__ == '__main__':
     detections = []
     # cap = cv2.VideoCapture('one.mp4')
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     flag = True
     while True:
         ret, frame = cap.read()
@@ -85,9 +86,9 @@ if __name__ == '__main__':
         # frame = cv2.resize(frame, (width, height))
 
         # loop video
-        #if frame is None:
-        #    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-        #    continue
+        if frame is None:
+           cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+           continue
 
         # downsample
         height, width = frame.shape[:2]
@@ -141,6 +142,8 @@ if __name__ == '__main__':
         card_contours = []
         sets = []
 
+        render = np.zeros(frame_cpy.shape)
+
         if len(contours.shape) == 3:
             # cv2.drawContours(frame_cpy, contours, -1, (255,0,0), 3)
 
@@ -149,9 +152,11 @@ if __name__ == '__main__':
                 classification = cc.predict(card)
                 if classification :
                     found_cards.append(classification)
-                    card_contours.append(contour)
+                    card_contours.append(order_points(contour).astype(np.int32))
+                    # card_contours.append(contour)
 
             cv2.drawContours(frame_cpy, card_contours, -1, (255,0,0), 3)
+            render = cardDrawer.render_scene(found_cards, card_contours, frame_cpy.shape)
 
             # print([cc.class_to_str(c) for c in found_cards])
 
@@ -167,8 +172,7 @@ if __name__ == '__main__':
 
         display = np.zeros((height*2, width, 3), dtype='uint8')
         display[:height,:,:] = frame_cpy
-        display[height:,:,0] = binary
-
+        display[height:,:,:] = render
 
         cv2.imshow('frame', display)
         if cv2.waitKey(20) & 0xFF == ord('q'):
