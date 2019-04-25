@@ -5,11 +5,13 @@ import time
 from CardClassifier import CardClassifier
 import SetSolver
 import cardDrawer
+from FPSCalc import FPSCalc
 
 classify_width = 250
 classify_height = 150
 
 cc = CardClassifier('cardSVM.dat', 'colors.csv', 'numberSVM.dat', None, 'shapeSVM.dat', 'hog.dat')
+fps = FPSCalc(10)
 
 def order_points(pts):
     #pts = np.roll(pts, 1, axis=1)
@@ -74,25 +76,26 @@ def intersection(a,b):
 binary = None
 if __name__ == '__main__':
     detections = []
-    # cap = cv2.VideoCapture('one.mp4')
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture('one.mp4')
+    # cap = cv2.VideoCapture(0)
     flag = True
     while True:
         ret, frame = cap.read()
-        # frame = cv2.imread('set.jpg')
-        # height, width = frame.shape[:2]
-        # height = int(height*0.25)
-        # width = int(width*0.25)
-        # frame = cv2.resize(frame, (width, height))
 
         # loop video
         if frame is None:
            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
            continue
 
+        # frame = cv2.imread('set.jpg')
+        height, width = frame.shape[:2]
+        height = int(height*0.25)
+        width = int(width*0.25)
+        frame = cv2.resize(frame, (width, height))
+
         # downsample
         height, width = frame.shape[:2]
-        scale = 0.7
+        scale = 1#0.7
         height = int(height*scale)
         width = int(width*scale)
         frame = cv2.resize(frame, (width, height))
@@ -167,8 +170,10 @@ if __name__ == '__main__':
                 # frame_cpy = cv2.fillPoly(frame_cpy, contours[i], (255,0,0))
 
         cv2.putText(frame_cpy, str(len(sets)) + (" Total Set" if len(sets) == 1 else " Total Sets"),\
-                    (30,50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2)
-
+                    (30,50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2)
+        fps.frame()
+        cv2.putText(frame_cpy, str(round(fps.fps(),1)) + (" FPS"),\
+                    (30,frame_cpy.shape[0]-20), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
 
         display = np.zeros((height*2, width, 3), dtype='uint8')
         display[:height,:,:] = frame_cpy
