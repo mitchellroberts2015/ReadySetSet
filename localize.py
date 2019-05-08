@@ -10,7 +10,7 @@ from FPSCalc import FPSCalc
 classify_width = 250
 classify_height = 150
 
-cc = CardClassifier('cardSVM.dat', 'colors.csv', 'numberSVM.dat', None, 'shapeSVM.dat', 'hog.dat')
+cc = CardClassifier('cardSVM.dat', 'colors.csv', 'numberSVM.dat', 'patternSVM.dat', 'shapeSVM.dat', 'hog.dat')
 fps = FPSCalc(10)
 
 def order_points(pts):

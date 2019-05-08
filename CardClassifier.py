@@ -8,7 +8,7 @@ class CardClassifier :
         self.true_colors = np.genfromtxt(colorModel, delimiter=",")
         self.true_hues = np.apply_along_axis(self.bgr_hue, 1, self.true_colors)
         self.number_svm = cv2.ml.SVM_load(numberModel)
-        #self.pattern_svm = cv2.ml.SVM_load(patternModel)
+        self.pattern_svm = cv2.ml.SVM_load(patternModel)
         self.shape_svm = cv2.ml.SVM_load(shapeModel)
         self.hog = cv2.HOGDescriptor(hogModel)
 
@@ -27,28 +27,18 @@ class CardClassifier :
         img = img.reshape((img.shape[0] * img.shape[1], 3))
         return img[~np.all(img==0, axis=1)].mean(axis=0)
 
-    # def get_kmeans(self, img) :
-    #     hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    #     flat_img = hsv_img.reshape((img.shape[0]*img.shape[1], 3))
-    #     features = flat_img[:,1]
-    #     whitened = whiten(features)
-    #     saturations = kmeans(whitened,2)[0] * np.std(features, 0)
-    #     not_white = np.argmax(saturations)
-    #     idx,_ = vq(features,saturations)
-    #     mask = idx == not_white
-    #     mask = np.reshape(mask, img.shape[:-1])
-    #     bgr_mean = np.mean(img[mask],0)
-    #     return (self.bgr_hue(bgr_mean), mask)
+    def get_sats(self, img, block_size) :
+        x_blocks = img.shape[1] // block_size[0]
+        y_blocks = img.shape[0] // block_size[1]
+        hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        sats = np.zeros((x_blocks, y_blocks, 2), np.float32)
 
-    # def get_dominant_hue(self, img) :
-    #     return self.get_kmeans(img)[0]
+        for y in range(y_blocks) :
+            for x in range(x_blocks) :
+                block = hsv_img[y*block_size[1]:(y+1)*block_size[1], x*block_size[0]:(x+1)*block_size[0],1]
+                sats[x,y] = [np.mean(block), np.std(block)]
 
-    # def predict_color(self, img, dominant_hue=None) :
-    #     if dominant_hue is None :
-    #         dominant_hue = self.get_dominant_hue(img)
-    #     diffs = np.abs((self.true_hues - dominant_hue))
-    #     diffs[diffs>180] = -1 * diffs[diffs>180] + 360
-    #     return np.argmin(diffs)
+        return sats.flatten()
 
     def predict_color(self, img) :
         color = self.get_mean_color(img)
@@ -64,7 +54,8 @@ class CardClassifier :
         return int(self.number_svm.predict(img_hog)[1][0][0])
 
     def predict_pattern(self, img) :
-        return 1
+        sats = self.get_sats(img, (25,25))[np.newaxis]
+        return int(self.pattern_svm.predict(sats)[1][0][0])
 
     def predict_shape(self, img, gray_img=None, img_hog=None) :
         if img_hog is None :
